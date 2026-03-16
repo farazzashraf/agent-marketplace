@@ -4,6 +4,7 @@ import AgentCard from './components/AgentCard';
 import Sidebar from './components/Sidebar';
 import AgentDetailsModal from './components/AgentDetailsModal';
 import AISearchModal from './components/AISearchModal';
+import RequestAgentModal from './components/RequestAgentModal';
 import CommunityFeed from './components/CommunityFeed';
 import SubmitAgent from './components/SubmitAgent';
 import Notifications from './components/Notifications';
@@ -23,10 +24,16 @@ export default function App() {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isAISearchOpen, setIsAISearchOpen] = useState(false);
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'trending' | 'newest' | 'recommended'>('trending');
   const [mainView, setMainView] = useState<ViewType>('agents');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [recommendedAgentIds, setRecommendedAgentIds] = useState<string[] | null>(null);
+
+  const handleAgentRequest = (requestData: any) => {
+    console.log("New Agent Request Submitted:", requestData);
+    alert("Your request has been posted to the community!");
+  };
 
   const handleDeveloperClick = (developer: Developer) => {
     const user = users.find(u => u.id === developer.id);
@@ -41,10 +48,8 @@ export default function App() {
 
   const handleToggleFollow = (targetUserId: string) => {
     if (!currentUser) return;
-
     setUsers(prevUsers => {
       const isFollowing = currentUser.following.includes(targetUserId);
-      
       return prevUsers.map(u => {
         if (u.id === currentUser.id) {
           return {
@@ -66,7 +71,6 @@ export default function App() {
       });
     });
 
-    // Also update currentUser state
     setCurrentUser(prev => {
       if (!prev) return prev;
       const isFollowing = prev.following.includes(targetUserId);
@@ -78,7 +82,6 @@ export default function App() {
       };
     });
 
-    // Also update selectedUser state if it's the one being followed/unfollowed
     setSelectedUser(prev => {
       if (!prev || prev.id !== targetUserId) return prev;
       const isFollowing = currentUser.following.includes(targetUserId);
@@ -94,7 +97,7 @@ export default function App() {
   const handleAddAgent = (newAgent: Agent) => {
     setAgents([newAgent, ...agents]);
     setMainView('agents');
-    setActiveTab('newest'); // Show the newly added agent at the top if they switch to newest
+    setActiveTab('newest');
     setSelectedCategory('All');
   };
 
@@ -139,8 +142,6 @@ export default function App() {
       return agent;
     });
     setAgents(updatedAgents);
-    
-    // Update the selected agent so the modal updates immediately
     if (selectedAgent && selectedAgent.id === agentId) {
       setSelectedAgent({
         ...selectedAgent,
@@ -155,37 +156,19 @@ export default function App() {
       if (agent.id === agentId) {
         let newUpvotes = agent.upvotes;
         let newUserVote = agent.userVote;
-
         if (voteType === 'up') {
-          if (agent.userVote === 'up') {
-            newUpvotes -= 1;
-            newUserVote = null;
-          } else if (agent.userVote === 'down') {
-            newUpvotes += 2;
-            newUserVote = 'up';
-          } else {
-            newUpvotes += 1;
-            newUserVote = 'up';
-          }
+          if (agent.userVote === 'up') { newUpvotes -= 1; newUserVote = null; }
+          else if (agent.userVote === 'down') { newUpvotes += 2; newUserVote = 'up'; }
+          else { newUpvotes += 1; newUserVote = 'up'; }
         } else if (voteType === 'down') {
-          if (agent.userVote === 'down') {
-            newUpvotes += 1;
-            newUserVote = null;
-          } else if (agent.userVote === 'up') {
-            newUpvotes -= 2;
-            newUserVote = 'down';
-          } else {
-            newUpvotes -= 1;
-            newUserVote = 'down';
-          }
+          if (agent.userVote === 'down') { newUpvotes += 1; newUserVote = null; }
+          else if (agent.userVote === 'up') { newUpvotes -= 2; newUserVote = 'down'; }
+          else { newUpvotes -= 1; newUserVote = 'down'; }
         }
-
         const updatedAgent = { ...agent, upvotes: newUpvotes, userVote: newUserVote };
-        
         if (selectedAgent && selectedAgent.id === agentId) {
           setSelectedAgent(updatedAgent);
         }
-        
         return updatedAgent;
       }
       return agent;
@@ -194,215 +177,130 @@ export default function App() {
 
   const renderContent = () => {
     switch (mainView) {
-      case 'launch':
-        return <SubmitAgent onAddAgent={handleAddAgent} onCancel={() => setMainView('agents')} />;
-      case 'notifications':
-        return <Notifications />;
-      case 'profile': {
-        const profileAgents = agents.filter(a => a.developer.id === currentUser?.id);
-        return (
-          <Profile 
-            user={currentUser!}
-            currentUser={currentUser}
-            users={users}
-            isCurrentUser={true}
-            agents={profileAgents}
-            onEditProfile={() => setMainView('settings')} 
-            onAgentClick={setSelectedAgent}
-            onVote={handleVote}
-            onUserClick={handleUserClick}
-            onToggleFollow={handleToggleFollow}
-            onViewNetwork={() => setMainView('network')}
-            onDeveloperClick={handleDeveloperClick}
-          />
+      case 'launch': return <SubmitAgent onAddAgent={handleAddAgent} onCancel={() => setMainView('agents')} />;
+      case 'notifications': return <Notifications />;
+      case 'profile': return (
+          <Profile user={currentUser!} currentUser={currentUser} users={users} isCurrentUser={true}
+            agents={agents.filter(a => a.developer.id === currentUser?.id)} onEditProfile={() => setMainView('settings')} 
+            onAgentClick={setSelectedAgent} onVote={handleVote} onUserClick={handleUserClick}
+            onToggleFollow={handleToggleFollow} onViewNetwork={() => setMainView('network')} onDeveloperClick={handleDeveloperClick} />
         );
-      }
-      case 'developerProfile':
-        if (!selectedUser) return null;
-        return (
-          <Profile 
-            user={selectedUser}
-            currentUser={currentUser}
-            users={users}
-            agents={agents.filter(a => a.developer.id === selectedUser.id)}
-            isCurrentUser={currentUser?.id === selectedUser.id}
-            onAgentClick={setSelectedAgent}
-            onVote={handleVote}
-            onUserClick={handleUserClick}
-            onToggleFollow={handleToggleFollow}
-            onViewNetwork={() => setMainView('network')}
-            onDeveloperClick={handleDeveloperClick}
-          />
+      case 'developerProfile': if (!selectedUser) return null; return (
+          <Profile user={selectedUser} currentUser={currentUser} users={users} agents={agents.filter(a => a.developer.id === selectedUser.id)}
+            isCurrentUser={currentUser?.id === selectedUser.id} onAgentClick={setSelectedAgent} onVote={handleVote} onUserClick={handleUserClick}
+            onToggleFollow={handleToggleFollow} onViewNetwork={() => setMainView('network')} onDeveloperClick={handleDeveloperClick} />
         );
-      case 'network':
-        return (
-          <Network 
-            users={users}
-            currentUser={currentUser}
-            onToggleFollow={handleToggleFollow}
-            onUserClick={handleUserClick}
-          />
-        );
-      case 'leaderboard':
-        return <Leaderboard data={leaderboardData} onUserClick={handleUserClick} />;
-      case 'settings':
-        return <Settings />;
-      case 'userRequests':
-        return <UserRequests />;
-      case 'agentTester':
-        return <AgentTester agents={agents} />;
-      case 'community':
-        return (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="lg:col-span-2">
+      case 'network': return <Network users={users} currentUser={currentUser} onToggleFollow={handleToggleFollow} onUserClick={handleUserClick} />;
+      case 'leaderboard': return <Leaderboard data={leaderboardData} onUserClick={handleUserClick} />;
+      case 'settings': return <Settings />;
+      case 'userRequests': return <UserRequests />;
+      case 'agentTester': return <AgentTester agents={agents} />;
+      case 'community': return (
+          <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-12">
+            <div className="lg:col-span-8 xl:col-span-9">
               <CommunityFeed initialPosts={mockPosts} />
             </div>
-            <div className="mt-8 lg:mt-0">
-              <Sidebar 
-                leaderboard={leaderboardData.slice(0, 3)} 
-                onUserClick={handleUserClick} 
-                onViewLeaderboard={() => setMainView('leaderboard')}
-                showLeaderboard={false} 
-              />
+            <div className="lg:col-span-4 xl:col-span-3">
+              <Sidebar leaderboard={leaderboardData.slice(0, 3)} onUserClick={handleUserClick} 
+                onViewLeaderboard={() => setMainView('leaderboard')} showLeaderboard={false} />
             </div>
           </div>
         );
       case 'agents':
-      default:
-        return (
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="lg:col-span-2">
+      default: return (
+          <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-12">
+            <div className="lg:col-span-8 xl:col-span-9">
               <div className="mb-6 flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200">
-                <div className="flex items-center gap-6 overflow-x-auto no-scrollbar">
-                  {recommendedAgentIds && recommendedAgentIds.length > 0 && (
-                    <button 
-                      onClick={() => setActiveTab('recommended')}
-                      className={`whitespace-nowrap text-sm font-semibold transition-colors relative pb-4 ${activeTab === 'recommended' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
-                    >
-                      Recommended for You
-                      {activeTab === 'recommended' && (
-                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"></span>
-                      )}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200">
+                  <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto no-scrollbar touch-pan-x">
+                    {recommendedAgentIds && recommendedAgentIds.length > 0 && (
+                      <button onClick={() => setActiveTab('recommended')} className={`whitespace-nowrap text-sm sm:text-base font-semibold transition-colors relative pb-3 sm:pb-4 ${activeTab === 'recommended' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}>
+                        Recommended for You
+                        {activeTab === 'recommended' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"></span>}
+                      </button>
+                    )}
+                    <button onClick={() => setActiveTab('trending')} className={`whitespace-nowrap text-sm sm:text-base font-semibold transition-colors relative pb-3 sm:pb-4 ${activeTab === 'trending' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}>
+                      Trending Agents
+                      {activeTab === 'trending' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"></span>}
                     </button>
+                    <button onClick={() => setActiveTab('newest')} className={`whitespace-nowrap text-sm sm:text-base font-semibold transition-colors relative pb-3 sm:pb-4 ${activeTab === 'newest' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}>
+                      Newest
+                      {activeTab === 'newest' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"></span>}
+                    </button>
+                  </div>
+                  {recommendedAgentIds && recommendedAgentIds.length > 0 && activeTab === 'recommended' && (
+                     <button onClick={() => { setRecommendedAgentIds(null); setActiveTab('trending'); }} className="whitespace-nowrap text-xs sm:text-sm text-gray-500 hover:text-gray-900 pb-3 sm:pb-0">Clear Recommendations</button>
                   )}
-                  <button 
-                    onClick={() => setActiveTab('trending')}
-                    className={`whitespace-nowrap text-sm font-semibold transition-colors relative pb-4 ${activeTab === 'trending' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
-                  >
-                    Trending Agents
-                    {activeTab === 'trending' && (
-                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"></span>
-                    )}
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('newest')}
-                    className={`whitespace-nowrap text-sm font-semibold transition-colors relative pb-4 ${activeTab === 'newest' ? 'text-indigo-600' : 'text-gray-500 hover:text-gray-900'}`}
-                  >
-                    Newest
-                    {activeTab === 'newest' && (
-                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"></span>
-                    )}
-                  </button>
                 </div>
-                {recommendedAgentIds && recommendedAgentIds.length > 0 && activeTab === 'recommended' && (
-                   <button onClick={() => { setRecommendedAgentIds(null); setActiveTab('trending'); }} className="whitespace-nowrap text-xs text-gray-500 hover:text-gray-900 pb-4 sm:pb-0">Clear Recommendations</button>
+
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar touch-pan-x pb-2">
+                  {allCategories.map(cat => (
+                    <button key={cat} onClick={() => setSelectedCategory(cat)} className={`whitespace-nowrap rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${selectedCategory === cat ? 'bg-indigo-600 text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4 sm:space-y-5">
+                {displayedAgents.length > 0 ? (
+                  displayedAgents.map((agent) => (
+                    <AgentCard key={agent.id} agent={agent} onClick={setSelectedAgent} onVote={handleVote} onDeveloperClick={handleDeveloperClick} />
+                  ))
+                ) : (
+                  <div className="rounded-3xl border border-dashed border-gray-300 bg-gray-50 p-10 sm:p-16 text-center">
+                    <h3 className="text-base sm:text-lg font-medium text-gray-900">No agents found</h3>
+                    <p className="mt-2 text-sm sm:text-base text-gray-500">Try selecting a different category or clearing filters.</p>
+                  </div>
                 )}
               </div>
-
-              <div className="flex flex-wrap gap-2">
-                {allCategories.map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${selectedCategory === cat ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
             </div>
 
-            <div className="space-y-4">
-              {displayedAgents.length > 0 ? (
-                displayedAgents.map((agent) => (
-                  <AgentCard 
-                    key={agent.id} 
-                    agent={agent} 
-                    onClick={setSelectedAgent} 
-                    onVote={handleVote}
-                    onDeveloperClick={handleDeveloperClick}
-                  />
-                ))
-              ) : (
-                <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-12 text-center">
-                  <h3 className="text-sm font-medium text-gray-900">No agents found</h3>
-                  <p className="mt-1 text-sm text-gray-500">Try selecting a different category.</p>
-                </div>
-              )}
+            <div className="lg:col-span-4 xl:col-span-3 mt-8 lg:mt-0">
+              <Sidebar leaderboard={leaderboardData.slice(0, 3)} onUserClick={handleUserClick} onViewLeaderboard={() => setMainView('leaderboard')} showLeaderboard={true} />
             </div>
           </div>
-
-          <div className="mt-8 lg:mt-0">
-            <Sidebar 
-              leaderboard={leaderboardData.slice(0, 3)} 
-              onUserClick={handleUserClick} 
-              onViewLeaderboard={() => setMainView('leaderboard')}
-              showLeaderboard={true} 
-            />
-          </div>
-        </div>
         );
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-sans text-gray-900 overflow-x-hidden">
-      <Navbar activeView={mainView} setActiveView={setMainView} onOpenAISearch={() => setIsAISearchOpen(true)} />
+    <div className="min-h-screen bg-[#F8FAFC] font-sans text-gray-900 overflow-x-hidden selection:bg-indigo-100 selection:text-indigo-900">
+      <Navbar 
+        activeView={mainView} 
+        setActiveView={setMainView} 
+        onOpenAISearch={() => setIsAISearchOpen(true)}
+        onOpenRequestModal={() => setIsRequestModalOpen(true)} 
+      />
       
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Hero Section - Only show on main feeds */}
+      <main className="mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 md:px-8 lg:py-10">
         {(mainView === 'agents' || mainView === 'community') && (
-          <div className="mb-12 py-8 text-center sm:py-12">
-            <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+          <div className="mb-10 sm:mb-14 py-8 text-center sm:py-12 md:py-16">
+            <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl lg:text-[4rem] leading-tight">
               {mainView === 'agents' 
-                ? <>Discover the next generation of <span className="text-indigo-600">AI Agents</span></>
-                : <>The <span className="text-indigo-600">AI Agent</span> Community</>
+                ? <>Discover the next generation of <br className="hidden sm:block"/><span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">AI Agents</span></>
+                : <>The <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">AI Agent</span> Community</>
               }
             </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-500">
+            <p className="mx-auto mt-4 sm:mt-6 max-w-2xl text-base sm:text-lg md:text-xl text-gray-500">
               {mainView === 'agents'
-                ? "Explore autonomous agents built by top developers. Review, try, or hire creators to build custom AI solutions for your business."
+                ? "Explore autonomous agents built by top developers. Review, try, or hire creators to build custom AI solutions."
                 : "Connect with developers building the future, or request custom AI agents for your specific business needs."
               }
             </p>
           </div>
         )}
-
         {renderContent()}
       </main>
 
-      {/* Agent Details Modal */}
-      {selectedAgent && (
-        <AgentDetailsModal 
-          agent={selectedAgent} 
-          onClose={() => setSelectedAgent(null)} 
-          onAddReview={handleAddReview}
-          onVote={handleVote}
-          onDeveloperClick={handleDeveloperClick}
-        />
-      )}
-
-      {/* AI Search Modal */}
-      <AISearchModal
-        isOpen={isAISearchOpen}
-        onClose={() => setIsAISearchOpen(false)}
-        agents={agents}
-        onAgentClick={setSelectedAgent}
-        onVote={handleVote}
-        onDeveloperClick={handleDeveloperClick}
+      {selectedAgent && <AgentDetailsModal agent={selectedAgent} onClose={() => setSelectedAgent(null)} onAddReview={handleAddReview} onVote={handleVote} onDeveloperClick={handleDeveloperClick} />}
+      <AISearchModal isOpen={isAISearchOpen} onClose={() => setIsAISearchOpen(false)} agents={agents} onAgentClick={setSelectedAgent} onVote={handleVote} onDeveloperClick={handleDeveloperClick} />
+      
+      <RequestAgentModal 
+        isOpen={isRequestModalOpen} 
+        onClose={() => setIsRequestModalOpen(false)} 
+        onSubmit={handleAgentRequest} 
       />
     </div>
   );
 }
-
