@@ -10,7 +10,7 @@ interface AISearchModalProps {
   onClose: () => void;
   agents: Agent[];
   onAgentClick: (agent: Agent) => void;
-  onVote: (agentId: string, voteType: 'up' | 'down') => void;
+  onVote: (agentId: string) => void; // UPDATED: Removed voteType
   onDeveloperClick: (developer: Developer) => void;
 }
 

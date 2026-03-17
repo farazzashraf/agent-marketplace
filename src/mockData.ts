@@ -4,7 +4,7 @@ export const mockConsumers: User[] = [
   {
     id: 'c1',
     name: 'David Kim',
-    avatar: 'https://picsum.photos/seed/david/150/150',
+    avatar: 'https://ui-avatars.com/api/?name=David+Kim&background=random',
     bio: 'Product Manager looking for AI tools to automate workflows.',
     role: 'consumer',
     followers: ['d1'],
@@ -13,7 +13,7 @@ export const mockConsumers: User[] = [
   {
     id: 'c2',
     name: 'Elena Rodriguez',
-    avatar: 'https://picsum.photos/seed/elena/150/150',
+    avatar: 'https://ui-avatars.com/api/?name=Elena+Rodriguez&background=random',
     bio: 'Marketing director exploring AI content generation.',
     role: 'consumer',
     followers: [],
@@ -25,7 +25,7 @@ export const mockDevelopers: Developer[] = [
   {
     id: 'd1',
     name: 'Alice Chen',
-    avatar: 'https://picsum.photos/seed/alice/150/150',
+    avatar: 'https://ui-avatars.com/api/?name=Alice+Chen&background=random',
     bio: 'Ex-OpenAI researcher building autonomous workflow agents. Specializes in LangChain and multi-agent systems.',
     role: 'developer',
     followers: ['c1', 'd2'],
@@ -37,7 +37,7 @@ export const mockDevelopers: Developer[] = [
   {
     id: 'd2',
     name: 'Marcus Johnson',
-    avatar: 'https://picsum.photos/seed/marcus/150/150',
+    avatar: 'https://ui-avatars.com/api/?name=Marcus+Johnson&background=random',
     bio: 'Full-stack AI developer. I build agents that integrate deeply with your existing SaaS tools.',
     role: 'developer',
     followers: ['c1'],
@@ -49,7 +49,7 @@ export const mockDevelopers: Developer[] = [
   {
     id: 'd3',
     name: 'Sarah Lee',
-    avatar: 'https://picsum.photos/seed/sarah/150/150',
+    avatar: 'https://ui-avatars.com/api/?name=Sarah+Lee&background=random',
     bio: 'Focused on voice-native AI agents and customer support automation.',
     role: 'developer',
     followers: ['c2'],
@@ -64,107 +64,124 @@ export const allMockUsers: User[] = [...mockDevelopers, ...mockConsumers];
 
 export const mockAgents: Agent[] = [
   {
-    id: 'a1',
-    name: 'DataScribe',
-    tagline: 'Autonomous data analyst that builds dashboards from plain English.',
-    description: 'DataScribe connects directly to your Postgres or Snowflake database. Instead of writing SQL, you just ask questions. It not only fetches the data but automatically generates Recharts dashboards and writes a weekly summary report for your team.',
-    upvotes: 342,
-    commentsCount: 45,
-    developer: mockDevelopers[0],
-    categories: ['Data Analysis', 'Internal Tools'],
-    imageUrl: 'https://picsum.photos/seed/datascribe/400/300',
+    id: '1',
+    name: 'AutoWriter Pro',
+    tagline: 'Generates SEO-optimized blog posts in seconds.',
+    description: 'An AI assistant that researches and writes complete articles based on a single keyword.',
+    categories: ['Writing Assistant', 'Marketing'],
     pricing: 'Freemium',
-    reviews: [
-      {
-        id: 'r1',
-        userId: 'u1',
-        userName: 'David Kim',
-        userAvatar: 'https://picsum.photos/seed/david/100/100',
-        rating: 5,
-        comment: 'Saved our startup from hiring a full-time data analyst early on. The dashboards are incredibly accurate.',
-        date: '2 days ago'
-      }
-    ]
+    developer: mockDevelopers[0], // Using the properly typed mock developer
+    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=200',
+    upvotes: 342,
+    commentsCount: 28,
+    userVote: null,
+    reviews: []
   },
   {
-    id: 'a2',
-    name: 'SalesCloser AI',
-    tagline: 'Your autonomous SDR that researches leads and drafts hyper-personalized emails.',
-    description: 'SalesCloser doesn\'t just send templates. It reads a prospect\'s LinkedIn, their company\'s recent news, and their GitHub activity to draft highly personalized outreach. It can even handle initial objections autonomously.',
-    upvotes: 289,
-    commentsCount: 32,
-    developer: mockDevelopers[1],
-    categories: ['Sales', 'Outreach'],
-    imageUrl: 'https://picsum.photos/seed/salescloser/400/300',
-    pricing: '$49/mo',
-    reviews: [
-      {
-        id: 'r2',
-        userId: 'u2',
-        userName: 'Emily Chen',
-        userAvatar: 'https://picsum.photos/seed/emily/100/100',
-        rating: 4,
-        comment: 'Great tool. The personalization is spooky good. Sometimes it hallucinates a bit on company news, but Marcus is quick to fix bugs.',
-        date: '1 week ago'
-      }
-    ]
-  },
-  {
-    id: 'a3',
-    name: 'DevOpsBot',
-    tagline: 'Resolves PagerDuty alerts by reading logs and applying safe fixes.',
-    description: 'When an alert fires, DevOpsBot reads the stack trace, checks Datadog logs, and proposes a fix. For known issues, it can automatically restart services or rollback deployments via your CI/CD pipeline.',
+    id: '2',
+    name: 'CodeBuddy',
+    tagline: 'Your AI pair programmer.',
+    description: 'Fixes bugs, writes unit tests, and refactors code right in your IDE.',
+    categories: ['Developer Tools', 'Productivity'],
+    pricing: '$15/mo',
+    developer: mockDevelopers[1], // Using the properly typed mock developer
+    imageUrl: 'https://images.unsplash.com/photo-1678286599522-cb5287f3b60e?auto=format&fit=crop&q=80&w=200',
     upvotes: 512,
-    commentsCount: 89,
-    developer: mockDevelopers[2],
-    categories: ['DevOps', 'Engineering'],
-    imageUrl: 'https://picsum.photos/seed/devopsbot/400/300',
-    pricing: 'Enterprise',
-    reviews: [
-      {
-        id: 'r3',
-        userId: 'u3',
-        userName: 'Alex Rivera',
-        userAvatar: 'https://picsum.photos/seed/alex/100/100',
-        rating: 5,
-        comment: 'Literally lets me sleep through the night. Handled 4 minor outages last month without waking me up.',
-        date: '3 weeks ago'
-      }
-    ]
+    commentsCount: 45,
+    userVote: 'up',
+    reviews: []
   },
   {
-    id: 'a4',
-    name: 'LegalEagle',
-    tagline: 'AI paralegal that reviews contracts and flags risky clauses.',
-    description: 'Upload any NDA, MSA, or employment contract. LegalEagle highlights non-standard clauses, explains them in plain English, and suggests redlines based on your company\'s standard playbook.',
-    upvotes: 156,
-    commentsCount: 18,
-    developer: mockDevelopers[0],
-    categories: ['Legal', 'Productivity'],
-    imageUrl: 'https://picsum.photos/seed/legaleagle/400/300',
-    pricing: 'Pay-per-use',
+    id: '3',
+    name: 'SoraClip',
+    tagline: 'Text to high-definition video generation.',
+    description: 'Generate hyper-realistic b-roll and explainer videos from text prompts.',
+    categories: ['Video Generator'],
+    pricing: '$30/mo',
+    developer: mockDevelopers[2], // Using the properly typed mock developer
+    imageUrl: 'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?auto=format&fit=crop&q=80&w=200',
+    upvotes: 890,
+    commentsCount: 112,
+    userVote: null,
+    reviews: []
+  },
+  {
+    id: '4',
+    name: 'MidCanvas',
+    tagline: 'Advanced AI image generation with precise control.',
+    description: 'Create logos, illustrations, and photorealistic images with easy slider controls.',
+    categories: ['Image Generator', 'Productivity'],
+    pricing: '$10/mo',
+    developer: mockDevelopers[0], // Using the properly typed mock developer
+    imageUrl: 'https://images.unsplash.com/photo-1682687982501-1e58f813f228?auto=format&fit=crop&q=80&w=200',
+    upvotes: 750,
+    commentsCount: 89,
+    userVote: null,
+    reviews: []
+  },
+  {
+    id: '5',
+    name: 'VoiceClone',
+    tagline: 'Ultra-realistic text-to-speech.',
+    description: 'Clone your voice with 3 seconds of audio or choose from 1000+ realistic AI voices.',
+    categories: ['Audio & Voice', 'Video Generator'],
+    pricing: 'Free',
+    developer: mockDevelopers[1], // Using the properly typed mock developer
+    imageUrl: 'https://images.unsplash.com/photo-1589254065878-42c9da997008?auto=format&fit=crop&q=80&w=200',
+    upvotes: 210,
+    commentsCount: 15,
+    userVote: null,
     reviews: []
   }
 ];
 
 export const mockPosts: Post[] = [
+  // --- TOP POST ---
+  {
+    id: 'p5',
+    authorName: 'Marcus Johnson',
+    authorRole: 'Developer',
+    authorAvatar: 'https://ui-avatars.com/api/?name=Marcus+Johnson&background=random',
+    content: 'Just pushed a massive update to CodeBuddy! V2.0 now supports direct integration with VS Code Live Share. You can literally watch the agent type the code in real-time alongside you.',
+    timestamp: '2 days ago',
+    likes: 512,
+    comments: 89,
+    isLiked: true,
+    tags: ['Developer Tools', 'Updates', 'Showcase'],
+    replies: []
+  },
+  // --- TOP POST ---
+  {
+    id: 'p3',
+    authorName: 'Alice Chen',
+    authorRole: 'Developer',
+    authorAvatar: 'https://ui-avatars.com/api/?name=Alice+Chen&background=random',
+    content: 'I see a lot of requests for data extraction agents. Pro-tip: when requesting a custom agent, please provide sample data structures (like a target JSON schema)! It cuts development time in half. 🚀',
+    timestamp: '5 hours ago',
+    likes: 342,
+    comments: 45,
+    isLiked: true,
+    tags: ['Productivity', 'Tips', 'Development'],
+    replies: []
+  },
+  // --- LATEST ---
   {
     id: 'p1',
     authorName: 'Sarah Lee',
     authorRole: 'Developer',
-    authorAvatar: 'https://picsum.photos/seed/sarah/150/150',
+    authorAvatar: 'https://ui-avatars.com/api/?name=Sarah+Lee&background=random',
     content: 'Just updated DevOpsBot to handle Kubernetes cluster autoscaling! Anyone want to beta test the new feature? Looking for feedback from teams managing >50 nodes.',
     timestamp: '2 hours ago',
     likes: 24,
-    comments: 5,
+    comments: 2,
     isLiked: false,
-    tags: ['DevOps', 'Kubernetes', 'BetaTesting'],
+    tags: ['Developer Tools', 'Kubernetes', 'Beta'],
     replies: [
       {
         id: 'r1',
         authorName: 'Alex Johnson',
         authorRole: 'Consumer',
-        authorAvatar: 'https://picsum.photos/seed/alex/150/150',
+        authorAvatar: 'https://ui-avatars.com/api/?name=Alex+Johnson&background=random',
         content: '@ai Can you explain what Kubernetes cluster autoscaling means in simple terms?',
         timestamp: '1 hour ago',
         likes: 3
@@ -173,7 +190,7 @@ export const mockPosts: Post[] = [
         id: 'r2',
         authorName: 'AI Assistant',
         authorRole: 'AI',
-        authorAvatar: 'https://picsum.photos/seed/ai/150/150',
+        authorAvatar: 'https://ui-avatars.com/api/?name=AI&background=6366f1&color=fff',
         content: 'Sure! Kubernetes cluster autoscaling automatically adjusts the number of servers (nodes) in your cluster based on the demands of your applications. If your apps need more resources, it adds servers. If they need less, it removes them to save costs. It\'s like automatically adding or removing cashiers at a grocery store based on how long the checkout line is.',
         timestamp: '1 hour ago',
         likes: 15,
@@ -181,28 +198,70 @@ export const mockPosts: Post[] = [
       }
     ]
   },
+  // --- UNANSWERED ---
   {
     id: 'p2',
-    authorName: 'Michael Chang',
+    authorName: 'David Kim',
     authorRole: 'Consumer',
-    authorAvatar: 'https://picsum.photos/seed/michael/150/150',
+    authorAvatar: 'https://ui-avatars.com/api/?name=David+Kim&background=random',
     content: 'Looking for a custom agent that can read my daily supplier emails (PDF attachments) and update our Shopify inventory automatically. Any developers available for this? Budget is flexible.',
     timestamp: '4 hours ago',
     likes: 12,
-    comments: 8,
+    comments: 0,
     isLiked: false,
-    tags: ['ECommerce', 'Automation', 'Hiring']
+    tags: ['Productivity', 'Automation', 'Hiring'],
+    replies: []
   },
+  // --- LATEST ---
   {
-    id: 'p3',
-    authorName: 'Alice Chen',
+    id: 'p4',
+    authorName: 'Elena Rodriguez',
+    authorRole: 'Consumer',
+    authorAvatar: 'https://ui-avatars.com/api/?name=Elena+Rodriguez&background=random',
+    content: 'Has anyone tried using AutoWriter Pro for non-English blogs? Im trying to generate marketing content in Spanish but the tone feels slightly unnatural compared to its English output.',
+    timestamp: '1 day ago',
+    likes: 8,
+    comments: 1,
+    isLiked: false,
+    tags: ['Writing Assistant', 'Marketing', 'Review'],
+    replies: [
+      {
+        id: 'r4',
+        authorName: 'Alice Chen',
+        authorRole: 'Developer',
+        authorAvatar: 'https://ui-avatars.com/api/?name=Alice+Chen&background=random',
+        content: 'Try adding a custom system prompt specifically defining the regional dialect (e.g., "Mexican Spanish" vs "Spain Spanish"). LLMs tend to default to a very formal, neutral Spanish unless guided.',
+        timestamp: '22 hours ago',
+        likes: 12
+      }
+    ]
+  },
+  // --- UNANSWERED / CATEGORY SPECIFIC ---
+  {
+    id: 'p7',
+    authorName: 'Sarah Lee',
     authorRole: 'Developer',
-    authorAvatar: 'https://picsum.photos/seed/alice/150/150',
-    content: 'I see a lot of requests for data extraction agents. Pro-tip: when requesting a custom agent, please provide sample data structures! It cuts development time in half. ð',
-    timestamp: '5 hours ago',
-    likes: 89,
-    comments: 14,
-    isLiked: true,
-    tags: ['Tips', 'DataExtraction', 'Development']
+    authorAvatar: 'https://ui-avatars.com/api/?name=Sarah+Lee&background=random',
+    content: 'What are the best practices for prompting SoraClip? I am trying to get a consistent character across multiple video generations but the face keeps changing slightly.',
+    timestamp: '3 hours ago',
+    likes: 4,
+    comments: 0,
+    isLiked: false,
+    tags: ['Video Generator', 'Help', 'Prompting'],
+    replies: []
+  },
+  // --- UNANSWERED / CATEGORY SPECIFIC ---
+  {
+    id: 'p8',
+    authorName: 'Marcus Johnson',
+    authorRole: 'Developer',
+    authorAvatar: 'https://ui-avatars.com/api/?name=Marcus+Johnson&background=random',
+    content: 'Is anyone else experiencing high latency with VoiceClone API today? My production apps are taking ~4 seconds to return audio streams instead of the usual 800ms.',
+    timestamp: '30 minutes ago',
+    likes: 2,
+    comments: 0,
+    isLiked: false,
+    tags: ['Audio & Voice', 'API', 'BugReport'],
+    replies: []
   }
 ];

@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { Agent, Developer } from '../types';
-import { ChevronUp, ChevronDown, MessageSquare, Star } from 'lucide-react';
+import { ChevronUp, MessageSquare, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface AgentCardProps {
   agent: Agent;
   onClick: (agent: Agent) => void;
-  onVote: (agentId: string, voteType: 'up' | 'down') => void;
+  onVote: (agentId: string) => void; // Removed the voteType from the signature
   onDeveloperClick?: (developer: Developer) => void;
 }
 
@@ -76,14 +76,15 @@ export default function AgentCard({ agent, onClick, onVote, onDeveloperClick }: 
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center gap-0.5 bg-gray-50 rounded-xl p-1.5 sm:p-2 border border-gray-100">
+      {/* VOTE SECTION - Downvote Removed */}
+      <div className="flex flex-col items-center justify-center gap-1 bg-gray-50 rounded-xl p-2 border border-gray-100">
         <button 
-          onClick={(e) => { e.stopPropagation(); onVote(agent.id, 'up'); }}
+          onClick={(e) => { e.stopPropagation(); onVote(agent.id); }}
           className={`rounded-lg p-1.5 sm:p-2 transition-all ${agent.userVote === 'up' ? 'bg-indigo-100 text-indigo-600 shadow-sm' : 'text-gray-400 hover:bg-white hover:text-gray-900 hover:shadow-sm'}`}
         >
           <ChevronUp size={22} className="sm:h-6 sm:w-6" />
         </button>
-        <div className="relative flex h-7 w-10 sm:h-8 sm:w-12 items-center justify-center overflow-hidden">
+        <div className="relative flex h-6 w-10 sm:h-7 sm:w-12 items-center justify-center overflow-hidden">
           <AnimatePresence initial={false}>
             <motion.span
               key={agent.upvotes}
@@ -91,18 +92,12 @@ export default function AgentCard({ agent, onClick, onVote, onDeveloperClick }: 
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: direction * -15 }}
               transition={{ duration: 0.2 }}
-              className={`absolute text-sm sm:text-base font-bold ${agent.userVote === 'up' ? 'text-indigo-600' : agent.userVote === 'down' ? 'text-rose-600' : 'text-gray-800'}`}
+              className={`absolute text-sm sm:text-base font-bold ${agent.userVote === 'up' ? 'text-indigo-600' : 'text-gray-800'}`}
             >
               {agent.upvotes}
             </motion.span>
           </AnimatePresence>
         </div>
-        <button 
-          onClick={(e) => { e.stopPropagation(); onVote(agent.id, 'down'); }}
-          className={`rounded-lg p-1.5 sm:p-2 transition-all ${agent.userVote === 'down' ? 'bg-rose-100 text-rose-600 shadow-sm' : 'text-gray-400 hover:bg-white hover:text-gray-900 hover:shadow-sm'}`}
-        >
-          <ChevronDown size={22} className="sm:h-6 sm:w-6" />
-        </button>
       </div>
     </div>
   );

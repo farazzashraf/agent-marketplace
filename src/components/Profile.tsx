@@ -11,7 +11,7 @@ interface ProfileProps {
   isCurrentUser?: boolean;
   onEditProfile?: () => void;
   onAgentClick: (agent: Agent) => void;
-  onVote: (agentId: string, voteType: 'up' | 'down') => void;
+  onVote: (agentId: string) => void;
   onUserClick?: (user: User) => void;
   onToggleFollow?: (userId: string) => void;
   onViewNetwork?: () => void;
