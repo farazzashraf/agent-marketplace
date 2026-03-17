@@ -50,6 +50,7 @@ export interface PostReply {
   content: string;
   timestamp: string;
   likes: number;
+  isLiked?: boolean; // NEW: Track if the current user liked the reply
   isAiResponse?: boolean;
 }
 
@@ -63,6 +64,7 @@ export interface Post {
   likes: number;
   comments: number;
   isLiked?: boolean;
+  isBookmarked?: boolean; // NEW: Track if the current user bookmarked the post
   tags?: string[];
   replies?: PostReply[];
 }
@@ -76,4 +78,3 @@ export interface Collection {
   upvotes: number;
   imageUrl: string;
 }
-

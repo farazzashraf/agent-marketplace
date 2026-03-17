@@ -146,7 +146,8 @@ export const mockPosts: Post[] = [
     timestamp: '2 days ago',
     likes: 512,
     comments: 89,
-    isLiked: true,
+    isLiked: true, // Showcasing liked state
+    isBookmarked: true, // Showcasing bookmarked state
     tags: ['Developer Tools', 'Updates', 'Showcase'],
     replies: []
   },
@@ -155,12 +156,12 @@ export const mockPosts: Post[] = [
     id: 'p3',
     authorName: 'Alice Chen',
     authorRole: 'Developer',
-    authorAvatar: 'https://ui-avatars.com/api/?name=Alice+Chen&background=random',
-    content: 'I see a lot of requests for data extraction agents. Pro-tip: when requesting a custom agent, please provide sample data structures (like a target JSON schema)! It cuts development time in half. 🚀',
+    authorAvatar: '[https://ui-avatars.com/api/?name=Alice+Chen&background=random](https://ui-avatars.com/api/?name=Alice+Chen&background=random)',
+    content: 'I see a lot of requests for data extraction agents. \n\n**Pro-tip:** when requesting a custom agent, please provide sample data structures (like a target `JSON` schema)! It cuts development time in half. \n\nWhat to include:\n- The source URL or Document type\n- The specific fields you need extracted\n- The final output format you want (`CSV`, `JSON`, `Postgres`)\n\n🚀',
     timestamp: '5 hours ago',
     likes: 342,
     comments: 45,
-    isLiked: true,
+    isLiked: false,
     tags: ['Productivity', 'Tips', 'Development'],
     replies: []
   },
@@ -169,8 +170,8 @@ export const mockPosts: Post[] = [
     id: 'p1',
     authorName: 'Sarah Lee',
     authorRole: 'Developer',
-    authorAvatar: 'https://ui-avatars.com/api/?name=Sarah+Lee&background=random',
-    content: 'Just updated DevOpsBot to handle Kubernetes cluster autoscaling! Anyone want to beta test the new feature? Looking for feedback from teams managing >50 nodes.',
+    authorAvatar: '[https://ui-avatars.com/api/?name=Sarah+Lee&background=random](https://ui-avatars.com/api/?name=Sarah+Lee&background=random)',
+    content: 'Just updated DevOpsBot to handle Kubernetes cluster autoscaling! Anyone want to beta test the new feature? Looking for feedback from teams managing `>50 nodes`.',
     timestamp: '2 hours ago',
     likes: 24,
     comments: 2,
@@ -181,7 +182,7 @@ export const mockPosts: Post[] = [
         id: 'r1',
         authorName: 'Alex Johnson',
         authorRole: 'Consumer',
-        authorAvatar: 'https://ui-avatars.com/api/?name=Alex+Johnson&background=random',
+        authorAvatar: '[https://ui-avatars.com/api/?name=Alex+Johnson&background=random](https://ui-avatars.com/api/?name=Alex+Johnson&background=random)',
         content: '@ai Can you explain what Kubernetes cluster autoscaling means in simple terms?',
         timestamp: '1 hour ago',
         likes: 3
@@ -190,8 +191,8 @@ export const mockPosts: Post[] = [
         id: 'r2',
         authorName: 'AI Assistant',
         authorRole: 'AI',
-        authorAvatar: 'https://ui-avatars.com/api/?name=AI&background=6366f1&color=fff',
-        content: 'Sure! Kubernetes cluster autoscaling automatically adjusts the number of servers (nodes) in your cluster based on the demands of your applications. If your apps need more resources, it adds servers. If they need less, it removes them to save costs. It\'s like automatically adding or removing cashiers at a grocery store based on how long the checkout line is.',
+        authorAvatar: '[https://ui-avatars.com/api/?name=AI&background=6366f1&color=fff](https://ui-avatars.com/api/?name=AI&background=6366f1&color=fff)',
+        content: 'Sure! **Kubernetes cluster autoscaling** automatically adjusts the number of servers (nodes) in your cluster based on the demands of your applications.\n\nIt\'s like automatically adding or removing cashiers at a grocery store based on how long the checkout line is.',
         timestamp: '1 hour ago',
         likes: 15,
         isAiResponse: true
@@ -210,58 +211,6 @@ export const mockPosts: Post[] = [
     comments: 0,
     isLiked: false,
     tags: ['Productivity', 'Automation', 'Hiring'],
-    replies: []
-  },
-  // --- LATEST ---
-  {
-    id: 'p4',
-    authorName: 'Elena Rodriguez',
-    authorRole: 'Consumer',
-    authorAvatar: 'https://ui-avatars.com/api/?name=Elena+Rodriguez&background=random',
-    content: 'Has anyone tried using AutoWriter Pro for non-English blogs? Im trying to generate marketing content in Spanish but the tone feels slightly unnatural compared to its English output.',
-    timestamp: '1 day ago',
-    likes: 8,
-    comments: 1,
-    isLiked: false,
-    tags: ['Writing Assistant', 'Marketing', 'Review'],
-    replies: [
-      {
-        id: 'r4',
-        authorName: 'Alice Chen',
-        authorRole: 'Developer',
-        authorAvatar: 'https://ui-avatars.com/api/?name=Alice+Chen&background=random',
-        content: 'Try adding a custom system prompt specifically defining the regional dialect (e.g., "Mexican Spanish" vs "Spain Spanish"). LLMs tend to default to a very formal, neutral Spanish unless guided.',
-        timestamp: '22 hours ago',
-        likes: 12
-      }
-    ]
-  },
-  // --- UNANSWERED / CATEGORY SPECIFIC ---
-  {
-    id: 'p7',
-    authorName: 'Sarah Lee',
-    authorRole: 'Developer',
-    authorAvatar: 'https://ui-avatars.com/api/?name=Sarah+Lee&background=random',
-    content: 'What are the best practices for prompting SoraClip? I am trying to get a consistent character across multiple video generations but the face keeps changing slightly.',
-    timestamp: '3 hours ago',
-    likes: 4,
-    comments: 0,
-    isLiked: false,
-    tags: ['Video Generator', 'Help', 'Prompting'],
-    replies: []
-  },
-  // --- UNANSWERED / CATEGORY SPECIFIC ---
-  {
-    id: 'p8',
-    authorName: 'Marcus Johnson',
-    authorRole: 'Developer',
-    authorAvatar: 'https://ui-avatars.com/api/?name=Marcus+Johnson&background=random',
-    content: 'Is anyone else experiencing high latency with VoiceClone API today? My production apps are taking ~4 seconds to return audio streams instead of the usual 800ms.',
-    timestamp: '30 minutes ago',
-    likes: 2,
-    comments: 0,
-    isLiked: false,
-    tags: ['Audio & Voice', 'API', 'BugReport'],
     replies: []
   }
 ];

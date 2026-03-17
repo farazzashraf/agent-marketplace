@@ -28,17 +28,11 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
     let filtered = [...posts];
     
     if (activeFilter === 'top') {
-      // Sort by highest likes + comments
       filtered.sort((a, b) => (b.likes + b.comments) - (a.likes + a.comments));
     } else if (activeFilter === 'unanswered') {
-      // Filter for posts with 0 comments/replies
       filtered = filtered.filter(p => p.comments === 0 && (!p.replies || p.replies.length === 0));
     } else if (activeFilter === 'categories') {
-      // Group by their primary category tag alphabetically
       filtered.sort((a, b) => (a.tags?.[0] || '').localeCompare(b.tags?.[0] || ''));
-    } else {
-      // 'latest' - default sorting (mock data is mostly sorted, but we ensure new posts stay on top)
-      // Since we use Date.now() for new posts, we can leave the array as is (new posts are unshifted)
     }
     
     return filtered;
@@ -59,6 +53,39 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
     }
   };
 
+  // --- RICH TEXT PARSER (MARKDOWN) ---
+  const renderRichText = (text: string) => {
+    if (!text) return null;
+    
+    // 1. Escape HTML to prevent XSS
+    let html = text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    // 2. Parse Code Blocks (```code```)
+    html = html.replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto text-sm font-mono my-4 shadow-md"><code>$1</code></pre>');
+    
+    // 3. Parse Inline Code (`code`)
+    html = html.replace(/`([^`]+)`/g, '<code class="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-md text-[0.9em] font-mono border border-indigo-100">$1</code>');
+    
+    // 4. Parse Bold Text (**text**)
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>');
+    
+    // 5. Parse Bullet Points (- item or * item)
+    html = html.replace(/^(?:-|\*)\s+(.*)$/gm, '<li class="ml-5 list-disc my-1 text-gray-800">$1</li>');
+    
+    // 6. Handle Line Breaks
+    html = html.replace(/\n/g, '<br />');
+    
+    // Clean up <br> tags inside <pre> blocks so code doesn't get double-spaced
+    html = html.replace(/(<pre[^>]*>[\s\S]*?<\/pre>)/g, (match) => {
+        return match.replace(/<br \/>/g, '\n');
+    });
+
+    return <div dangerouslySetInnerHTML={{ __html: html }} className="text-gray-700 leading-relaxed text-sm sm:text-base break-words" />;
+  };
+
   const handleCreateTopic = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTopicContent.trim()) return;
@@ -67,7 +94,7 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
       id: `p${Date.now()}`,
       authorName: 'Current User',
       authorRole: 'Developer',
-      authorAvatar: 'https://ui-avatars.com/api/?name=Current+User&background=6366f1&color=fff',
+      authorAvatar: '[https://ui-avatars.com/api/?name=Current+User&background=6366f1&color=fff](https://ui-avatars.com/api/?name=Current+User&background=6366f1&color=fff)',
       content: newTopicContent,
       timestamp: 'Just now',
       likes: 0,
@@ -80,7 +107,7 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
     setIsNewTopicOpen(false);
     setNewTopicContent('');
     setNewTopicTags('');
-    setActiveFilter('latest'); // Switch to latest to see the new post
+    setActiveFilter('latest');
   };
 
   const handleAddReply = () => {
@@ -90,7 +117,7 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
       id: `r${Date.now()}`,
       authorName: 'Current User',
       authorRole: 'Developer',
-      authorAvatar: 'https://ui-avatars.com/api/?name=Current+User&background=6366f1&color=fff',
+      authorAvatar: '[https://ui-avatars.com/api/?name=Current+User&background=6366f1&color=fff](https://ui-avatars.com/api/?name=Current+User&background=6366f1&color=fff)',
       content: replyContent,
       timestamp: 'Just now',
       likes: 0
@@ -106,8 +133,10 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
 
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      // Instruct the AI to use Markdown formatting
       const prompt = `You are a helpful AI assistant in a developer community forum for AI Agents. 
       Read the following forum post and provide a helpful, concise, and technical reply.
+      Use markdown formatting (like **bold**, \`inline code\`, and \`\`\`code blocks\`\`\`) where appropriate.
       
       Post: "${selectedPost.content}"
       
@@ -123,7 +152,7 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
           id: `ai${Date.now()}`,
           authorName: 'AI Assistant',
           authorRole: 'AI',
-          authorAvatar: 'https://ui-avatars.com/api/?name=AI&background=6366f1&color=fff',
+          authorAvatar: '[https://ui-avatars.com/api/?name=AI&background=6366f1&color=fff](https://ui-avatars.com/api/?name=AI&background=6366f1&color=fff)',
           content: response.text,
           timestamp: 'Just now',
           likes: 0,
@@ -203,8 +232,12 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
             });
 
             const mockViews = (post.likes * 14) + (post.comments * 32) + 142;
-            // Only pin the first item if we are looking at 'latest' or 'top'
             const isPinned = index === 0 && (activeFilter === 'latest' || activeFilter === 'top'); 
+
+            // Strip markdown for the clean preview in the table
+            const plainTextPreview = post.content
+                .replace(/```([\s\S]*?)```/g, '[Code Snippet] ')
+                .replace(/[*`_]/g, '');
 
             return (
               <div 
@@ -212,7 +245,6 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
                 onClick={() => setSelectedPost(post)}
                 className={`grid grid-cols-1 md:grid-cols-12 gap-4 p-4 sm:p-5 transition-colors cursor-pointer group ${isPinned ? 'bg-indigo-50/30 hover:bg-indigo-50/60' : 'hover:bg-gray-50'}`}
               >
-                {/* 1. Main Topic Column */}
                 <div className="md:col-span-6 lg:col-span-7 flex gap-4 items-start">
                   <div className="mt-1 flex-shrink-0 md:hidden lg:block relative">
                     <img src={post.authorAvatar} alt={post.authorName} className="w-10 h-10 rounded-full object-cover border border-gray-200" referrerPolicy="no-referrer" />
@@ -226,7 +258,7 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
                   <div className="min-w-0 flex-1">
                     <h3 className="text-base font-bold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug pr-4">
                       {isPinned && <span className="text-indigo-600 mr-2 md:hidden"><Pin size={14} className="inline fill-current -mt-0.5" /></span>}
-                      {post.content}
+                      {plainTextPreview}
                     </h3>
                     
                     <div className="mt-2.5 flex flex-wrap gap-2 items-center">
@@ -242,7 +274,6 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
                   </div>
                 </div>
 
-                {/* 2. Participants Column */}
                 <div className="hidden lg:flex col-span-2 items-center justify-center">
                   <div className="flex -space-x-2.5 overflow-hidden p-1">
                     {participants.slice(0, 4).map((avatar, i) => (
@@ -256,7 +287,6 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
                   </div>
                 </div>
 
-                {/* 3. Stats Columns */}
                 <div className="md:col-span-6 lg:col-span-3 flex items-center justify-between md:grid md:grid-cols-3 gap-4 text-gray-500 border-t border-gray-100 pt-3 mt-1 md:border-0 md:pt-0 md:mt-0">
                   <div className="flex items-center gap-1.5 md:flex-col md:justify-center md:gap-0.5">
                     <span className="md:hidden text-gray-400"><MessageSquare size={16} /></span>
@@ -305,8 +335,8 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
                 <label className="block text-sm font-bold text-gray-700 mb-2">What is on your mind?</label>
                 <textarea
                   required
-                  rows={4}
-                  placeholder="Ask a question, share a tip, or request an agent..."
+                  rows={5}
+                  placeholder="Ask a question, share a tip... (Markdown supported: **bold**, `code block`)"
                   className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 p-4 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-colors"
                   value={newTopicContent}
                   onChange={(e) => setNewTopicContent(e.target.value)}
@@ -331,12 +361,12 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
         </div>
       )}
 
-      {/* --- THREAD DETAILS MODAL (WITH AI) --- */}
+      {/* --- THREAD DETAILS MODAL --- */}
       {selectedPost && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
             
-            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100 bg-white sticky top-0 z-10">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100 bg-white sticky top-0 z-10 shrink-0">
               <h2 className="text-lg font-bold text-gray-900">Topic Details</h2>
               <button onClick={() => setSelectedPost(null)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
                 <X size={20} />
@@ -345,8 +375,8 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
 
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-50/50 space-y-6">
               
-              {/* Original Post */}
-              <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+              {/* Original Post (Markdown Rendered) */}
+              <div className="bg-white rounded-2xl p-5 sm:p-6 border border-gray-200 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <img src={selectedPost.authorAvatar} alt="author" className="w-10 h-10 rounded-full object-cover" />
                   <div>
@@ -354,15 +384,17 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
                     <div className="text-xs font-medium text-gray-500">{selectedPost.timestamp}</div>
                   </div>
                 </div>
-                <p className="text-gray-800 leading-relaxed font-medium">{selectedPost.content}</p>
-                <div className="mt-4 flex flex-wrap gap-2">
+                
+                {renderRichText(selectedPost.content)}
+                
+                <div className="mt-5 flex flex-wrap gap-2">
                   {selectedPost.tags?.map(tag => (
                     <span key={tag} className={`text-xs font-bold px-2.5 py-1 rounded-md border ${getTagColor(tag)}`}>{tag}</span>
                   ))}
                 </div>
               </div>
 
-              {/* Replies */}
+              {/* Replies (Markdown Rendered) */}
               <div className="space-y-4 pl-4 sm:pl-8 border-l-2 border-gray-100">
                 {selectedPost.replies?.map(reply => (
                   <div key={reply.id} className={`bg-white rounded-2xl p-5 border shadow-sm ${reply.isAiResponse ? 'border-indigo-200 bg-indigo-50/30' : 'border-gray-200'}`}>
@@ -376,18 +408,18 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
                         <div className="text-xs font-medium text-gray-500">{reply.timestamp}</div>
                       </div>
                     </div>
-                    <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-wrap">{reply.content}</p>
+                    {renderRichText(reply.content)}
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Reply Input Area */}
-            <div className="p-4 sm:p-6 bg-white border-t border-gray-100">
+            <div className="p-4 sm:p-6 bg-white border-t border-gray-100 shrink-0">
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
-                  placeholder="Write a reply..."
+                  placeholder="Write a reply... (Markdown supported)"
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddReply()}
@@ -404,7 +436,7 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
                   <button 
                     onClick={handleAskAI}
                     disabled={isAILoading}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-3 rounded-xl font-bold hover:shadow-lg disabled:opacity-50 transition-all shadow-md"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-3 rounded-xl font-bold hover:shadow-lg disabled:opacity-50 transition-all shadow-md whitespace-nowrap"
                   >
                     {isAILoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />} Ask AI
                   </button>
