@@ -68,6 +68,16 @@ export default function AgentDetailsModal({ agent, onClose, onAddReview, onVote,
             <div className="flex items-center justify-between border-b border-gray-100 px-4 sm:px-6 py-4">
               <div className="flex items-center gap-3">
                 <img src={agent.imageUrl} alt={agent.name} className="h-10 w-10 rounded-lg object-cover border border-gray-200" referrerPolicy="no-referrer" />
+                {/* <img 
+                  src={agent.imageUrl} 
+                  alt={agent.name} 
+                  // ADD THIS ONERROR BLOCK 👇
+                  onError={(e) => {
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(agent.name)}&background=e0e7ff&color=4f46e5&bold=true`;
+                  }}
+                  // KEEP YOUR EXISTING CLASSNAMES 👇
+                  className="w-full h-full object-cover"
+                /> */}
                 <div>
                   <h2 className="text-base sm:text-lg font-bold text-gray-900">{agent.name}</h2>
                   <p className="text-xs sm:text-sm text-gray-500 line-clamp-1">{agent.tagline}</p>

@@ -1,5 +1,9 @@
 import { useState, useMemo } from 'react';
-import { Trophy, Bot, TrendingUp, Award, LayoutGrid, Star } from 'lucide-react';
+import { 
+  Trophy, Bot, TrendingUp, Award, LayoutGrid, Star, ChevronDown,
+  Zap, Video, Image as ImageIcon, PenTool, Code, Mic, Megaphone, 
+  GraduationCap, BarChart3, Headset, CircleDollarSign, Scale, Blocks
+} from 'lucide-react';
 import { User, Agent, Developer } from '../types';
 
 interface LeaderboardProps {
@@ -19,6 +23,50 @@ export default function Leaderboard({ users, agents, onUserClick }: LeaderboardP
   }, [agents]);
 
   const tabs = ['Global', "Editor's Choice", ...categories];
+
+  // Helper to get specific SVG icons for desktop tabs
+  const getCategoryIcon = (cat: string, className: string) => {
+    switch(cat.toLowerCase()) {
+      case 'productivity': return <Zap size={16} className={className} />;
+      case 'video generator': return <Video size={16} className={className} />;
+      case 'image generator': return <ImageIcon size={16} className={className} />;
+      case 'writing assistant': return <PenTool size={16} className={className} />;
+      case 'developer tools': 
+      case 'devops': return <Code size={16} className={className} />;
+      case 'audio & voice': return <Mic size={16} className={className} />;
+      case 'marketing': 
+      case 'sales': return <Megaphone size={16} className={className} />;
+      case 'customer support': return <Headset size={16} className={className} />;
+      case 'data analysis': return <BarChart3 size={16} className={className} />;
+      case 'finance': return <CircleDollarSign size={16} className={className} />;
+      case 'legal': return <Scale size={16} className={className} />;
+      case 'education': return <GraduationCap size={16} className={className} />;
+      case 'general':
+      case 'agents': return <Bot size={16} className={className} />;
+      default: return <Blocks size={16} className={className} />;
+    }
+  };
+
+  // Helper to get specific Emojis for native mobile dropdown
+  const getCategoryEmoji = (cat: string) => {
+    switch(cat.toLowerCase()) {
+      case 'productivity': return '⚡ ';
+      case 'video generator': return '🎥 ';
+      case 'image generator': return '🖼️ ';
+      case 'writing assistant': return '✍️ ';
+      case 'developer tools': 
+      case 'devops': return '💻 ';
+      case 'audio & voice': return '🎙️ ';
+      case 'marketing': 
+      case 'sales': return '📢 ';
+      case 'customer support': return '🎧 ';
+      case 'data analysis': return '📊 ';
+      case 'finance': return '💰 ';
+      case 'legal': return '⚖️ ';
+      case 'education': return '🎓 ';
+      default: return '🧩 ';
+    }
+  };
 
   // Calculate scores and filter users based on the active tab
   const rankedData = useMemo(() => {
@@ -48,7 +96,7 @@ export default function Leaderboard({ users, agents, onUserClick }: LeaderboardP
   }, [users, agents, activeTab]);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 animate-in fade-in duration-500">
+    <div className="mx-auto max-w-5xl space-y-8 animate-in fade-in duration-500 pb-12">
       <div className="text-center space-y-4 mb-8">
         <div className={`mx-auto flex h-16 w-16 items-center justify-center rounded-3xl text-white shadow-lg transition-colors duration-500 ${activeTab === "Editor's Choice" ? 'bg-gradient-to-br from-amber-400 to-orange-500' : 'bg-gradient-to-br from-indigo-500 to-purple-600'}`}>
           {activeTab === "Editor's Choice" ? <Award size={32} /> : <Trophy size={32} />}
@@ -63,26 +111,52 @@ export default function Leaderboard({ users, agents, onUserClick }: LeaderboardP
         </p>
       </div>
 
-      {/* Scrollable Tabs Navigation */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar touch-pan-x pb-4 border-b border-gray-200 mask-fade-edges">
-        {tabs.map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`whitespace-nowrap flex items-center gap-2.5 rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300 ${
-              activeTab === tab 
-                ? tab === "Editor's Choice" 
-                  ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-md shadow-orange-500/20 scale-105'
-                  : 'bg-gray-900 text-white shadow-md scale-105' 
-                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
-            }`}
+      {/* Navigation - Responsive Dropdown for Mobile / Wrapping Pills for Desktop */}
+      <div className="mb-6 sm:mb-8 border-b border-gray-100 pb-6">
+        
+        {/* Mobile Dropdown (Visible only on small screens) */}
+        <div className="sm:hidden relative mx-4">
+          <select
+            value={activeTab}
+            onChange={(e) => setActiveTab(e.target.value)}
+            className="w-full appearance-none rounded-2xl border border-gray-200 bg-white px-5 py-4 pr-10 text-sm font-bold text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
           >
-            {tab === 'Global' && <Trophy size={16} className={activeTab === tab ? 'text-white' : 'text-gray-400'} />}
-            {tab === "Editor's Choice" && <Award size={18} className={activeTab === tab ? 'text-white' : 'text-amber-500'} />}
-            {tab !== 'Global' && tab !== "Editor's Choice" && <LayoutGrid size={16} className={activeTab === tab ? 'text-white' : 'text-gray-400'} />}
-            {tab}
-          </button>
-        ))}
+            {tabs.map(tab => (
+              <option key={tab} value={tab}>
+                {tab === 'Global' ? '🏆 ' : ''}
+                {tab === "Editor's Choice" ? '⭐ ' : ''}
+                {tab !== 'Global' && tab !== "Editor's Choice" ? getCategoryEmoji(tab) : ''}
+                {tab}
+              </option>
+            ))}
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500">
+            <ChevronDown size={20} />
+          </div>
+        </div>
+
+        {/* Desktop Tabs (Visible only on medium screens and up) */}
+        <div className="hidden sm:flex flex-wrap justify-center items-center gap-2.5 px-4">
+          {tabs.map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex items-center gap-2.5 rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300 ${
+                activeTab === tab 
+                  ? tab === "Editor's Choice" 
+                    ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-md shadow-orange-500/20 scale-105'
+                    : 'bg-gray-900 text-white shadow-md scale-105' 
+                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:scale-105'
+              }`}
+            >
+              {tab === 'Global' && <Trophy size={16} className={activeTab === tab ? 'text-white' : 'text-gray-400'} />}
+              {tab === "Editor's Choice" && <Award size={18} className={activeTab === tab ? 'text-white' : 'text-amber-500'} />}
+              {/* Dynamic SVG Icons for generated categories */}
+              {tab !== 'Global' && tab !== "Editor's Choice" && getCategoryIcon(tab, activeTab === tab ? 'text-white' : 'text-gray-400')}
+              {tab}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Leaderboard List */}
@@ -107,8 +181,8 @@ export default function Leaderboard({ users, agents, onUserClick }: LeaderboardP
                   
                   <div className="relative shrink-0">
                     <img src={user.avatar} alt={user.name} className="h-14 w-14 sm:h-16 sm:w-16 rounded-full object-cover border-2 border-white shadow-md group-hover:border-indigo-100 transition-colors" referrerPolicy="no-referrer" />
-                    {activeTab === "Editor's Choice" && (
-                      <div className="absolute -bottom-1 -right-1 bg-amber-400 text-white p-1 rounded-full border-2 border-white shadow-sm">
+                    {user.rating >= 4.8 && (
+                      <div title="Editor's Choice" className="absolute -bottom-1 -right-1 bg-amber-400 text-white p-1 rounded-full border-2 border-white shadow-sm">
                         <Star size={12} className="fill-current" />
                       </div>
                     )}

@@ -1,13 +1,47 @@
 import { useState, useMemo } from 'react';
-import { Post, PostReply } from '../types';
+import { Post, PostReply, Agent } from '../types';
 import { MessageSquare, Eye, Clock, Plus, Pin, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
+import { mockAgents } from '../mockData';
+
+// --- EMBEDDED AGENT CARD COMPONENT ---
+// 1. Add onAgentClick to the props here
+// --- EMBEDDED AGENT CARD COMPONENT ---
+const EmbeddedAgentCard = ({ agent, onAgentClick }: { agent: Agent, onAgentClick?: (agent: Agent) => void }) => {
+  return (
+    <button 
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (onAgentClick) onAgentClick(agent);
+      }}
+      className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all bg-white no-underline text-left w-full max-w-sm group cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500"
+    >
+      <img 
+        src={agent.imageUrl} 
+        alt={agent.name} 
+        className="h-10 w-10 rounded-lg object-cover border border-gray-200" 
+        referrerPolicy="no-referrer" 
+      />
+      <div className="flex flex-col min-w-0 flex-1">
+        <span className="font-bold text-sm text-gray-900 truncate">{agent.name}</span>
+        <span className="text-xs text-gray-500 truncate">{agent.tagline}</span>
+      </div>
+      <div className="shrink-0 ml-2">
+        <span className="bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-full font-bold">
+          View
+        </span>
+      </div>
+    </button>
+  );
+};
 
 interface CommunityFeedProps {
   initialPosts: Post[];
+  onAgentClick?: (agent: Agent) => void;
 }
 
-export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
+export default function CommunityFeed({ initialPosts, onAgentClick }: CommunityFeedProps) {
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [activeFilter, setActiveFilter] = useState('latest');
   
@@ -53,9 +87,17 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
     }
   };
 
-  // --- RICH TEXT PARSER (MARKDOWN) ---
+  // --- RICH TEXT PARSER (MARKDOWN + MENTIONS) ---
   const renderRichText = (text: string) => {
     if (!text) return null;
+    
+    const mentionRegex = /(@[a-zA-Z0-9_]+)/g;
+    
+    // Find all unique valid agents mentioned in the text
+    const mentionedAgents = Array.from(new Set(text.match(mentionRegex) || []))
+      .map(mention => mention.substring(1)) // Remove the '@'
+      .map(name => mockAgents.find(a => a.name.toLowerCase() === name.toLowerCase()))
+      .filter((agent): agent is Agent => !!agent); // Filter out invalid mentions
     
     // 1. Escape HTML to prevent XSS
     let html = text
@@ -63,19 +105,29 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
 
-    // 2. Parse Code Blocks (```code```)
+    // 2. Highlight Valid Mentions Inline
+    html = html.replace(mentionRegex, (match) => {
+      const name = match.substring(1);
+      const isValid = mockAgents.some(a => a.name.toLowerCase() === name.toLowerCase());
+      if (isValid) {
+        return `<span class="text-indigo-600 font-semibold bg-indigo-50 px-1 rounded-md">${match}</span>`;
+      }
+      return match;
+    });
+
+    // 3. Parse Code Blocks (```code```)
     html = html.replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-900 text-gray-100 p-4 rounded-xl overflow-x-auto text-sm font-mono my-4 shadow-md"><code>$1</code></pre>');
     
-    // 3. Parse Inline Code (`code`)
+    // 4. Parse Inline Code (`code`)
     html = html.replace(/`([^`]+)`/g, '<code class="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-md text-[0.9em] font-mono border border-indigo-100">$1</code>');
     
-    // 4. Parse Bold Text (**text**)
+    // 5. Parse Bold Text (**text**)
     html = html.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>');
     
-    // 5. Parse Bullet Points (- item or * item)
+    // 6. Parse Bullet Points (- item or * item)
     html = html.replace(/^(?:-|\*)\s+(.*)$/gm, '<li class="ml-5 list-disc my-1 text-gray-800">$1</li>');
     
-    // 6. Handle Line Breaks
+    // 7. Handle Line Breaks
     html = html.replace(/\n/g, '<br />');
     
     // Clean up <br> tags inside <pre> blocks so code doesn't get double-spaced
@@ -83,7 +135,25 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
         return match.replace(/<br \/>/g, '\n');
     });
 
-    return <div dangerouslySetInnerHTML={{ __html: html }} className="text-gray-700 leading-relaxed text-sm sm:text-base break-words" />;
+    return (
+      <div className="flex flex-col gap-3">
+        <div dangerouslySetInnerHTML={{ __html: html }} className="text-gray-700 leading-relaxed text-sm sm:text-base break-words" />
+        
+        {/* Render the unfurled agent cards below the text */}
+        {/* Render the unfurled agent cards below the text */}
+        {mentionedAgents.length > 0 && (
+          <div className="flex flex-col gap-2 mt-2">
+            {mentionedAgents.map(agent => (
+              <EmbeddedAgentCard 
+                key={agent.id} 
+                agent={agent} 
+                onAgentClick={onAgentClick} // <-- ADD THIS PROP
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   const handleCreateTopic = (e: React.FormEvent) => {
@@ -94,7 +164,7 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
       id: `p${Date.now()}`,
       authorName: 'Current User',
       authorRole: 'Developer',
-      authorAvatar: '[https://ui-avatars.com/api/?name=Current+User&background=6366f1&color=fff](https://ui-avatars.com/api/?name=Current+User&background=6366f1&color=fff)',
+      authorAvatar: 'https://ui-avatars.com/api/?name=Current+User&background=6366f1&color=fff',
       content: newTopicContent,
       timestamp: 'Just now',
       likes: 0,
@@ -117,7 +187,7 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
       id: `r${Date.now()}`,
       authorName: 'Current User',
       authorRole: 'Developer',
-      authorAvatar: '[https://ui-avatars.com/api/?name=Current+User&background=6366f1&color=fff](https://ui-avatars.com/api/?name=Current+User&background=6366f1&color=fff)',
+      authorAvatar: 'https://ui-avatars.com/api/?name=Current+User&background=6366f1&color=fff',
       content: replyContent,
       timestamp: 'Just now',
       likes: 0
@@ -152,7 +222,7 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
           id: `ai${Date.now()}`,
           authorName: 'AI Assistant',
           authorRole: 'AI',
-          authorAvatar: '[https://ui-avatars.com/api/?name=AI&background=6366f1&color=fff](https://ui-avatars.com/api/?name=AI&background=6366f1&color=fff)',
+          authorAvatar: 'https://ui-avatars.com/api/?name=AI&background=6366f1&color=fff',
           content: response.text,
           timestamp: 'Just now',
           likes: 0,
@@ -336,7 +406,7 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
                 <textarea
                   required
                   rows={5}
-                  placeholder="Ask a question, share a tip... (Markdown supported: **bold**, `code block`)"
+                  placeholder="Ask a question, share a tip... (Markdown supported: **bold**, `code block`, @Agent)"
                   className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 p-4 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white transition-colors"
                   value={newTopicContent}
                   onChange={(e) => setNewTopicContent(e.target.value)}
@@ -419,7 +489,7 @@ export default function CommunityFeed({ initialPosts }: CommunityFeedProps) {
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
-                  placeholder="Write a reply... (Markdown supported)"
+                  placeholder="Write a reply... (Markdown supported, @Agent)"
                   value={replyContent}
                   onChange={(e) => setReplyContent(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddReply()}

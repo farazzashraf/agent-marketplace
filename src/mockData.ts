@@ -85,7 +85,9 @@ export const mockAgents: Agent[] = [
     categories: ['Developer Tools', 'Productivity'],
     pricing: '$15/mo',
     developer: mockDevelopers[1], // Using the properly typed mock developer
-    imageUrl: 'https://images.unsplash.com/photo-1678286599522-cb5287f3b60e?auto=format&fit=crop&q=80&w=200',
+    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=200',
+    
+    // imageUrl: 'https://images.unsplash.com/photo-1678286599522-cb5287f3b60e?auto=format&fit=crop&q=80&w=200',
     upvotes: 512,
     commentsCount: 45,
     userVote: 'up',
@@ -113,7 +115,9 @@ export const mockAgents: Agent[] = [
     categories: ['Image Generator', 'Productivity'],
     pricing: '$10/mo',
     developer: mockDevelopers[0], // Using the properly typed mock developer
-    imageUrl: 'https://images.unsplash.com/photo-1682687982501-1e58f813f228?auto=format&fit=crop&q=80&w=200',
+    imageUrl: 'https://images.unsplash.com/photo-1589254065878-42c9da997008?auto=format&fit=crop&q=80&w=200',
+    
+    // imageUrl: 'https://images.unsplash.com/photo-1682687982501-1e58f813f228?auto=format&fit=crop&q=80&w=200',
     upvotes: 750,
     commentsCount: 89,
     userVote: null,
@@ -136,6 +140,29 @@ export const mockAgents: Agent[] = [
 ];
 
 export const mockPosts: Post[] = [
+  {
+    id: 'p6',
+    authorName: 'Elena Rodriguez',
+    authorRole: 'Consumer',
+    authorAvatar: 'https://ui-avatars.com/api/?name=Elena+Rodriguez&background=random',
+    content: 'I recently started using @MidCanvas for our ad creatives and the level of control is insane! Has anyone managed to hook it up to an automated pipeline? Also heavily testing out @AutoWriter Pro for the copy.',
+    timestamp: '15 minutes ago',
+    likes: 42,
+    comments: 1,
+    isLiked: false,
+    tags: ['Marketing', 'Productivity', 'Help'],
+    replies: [
+      {
+        id: 'r3',
+        authorName: 'Alice Chen',
+        authorRole: 'Developer',
+        authorAvatar: 'https://ui-avatars.com/api/?name=Alice+Chen&background=random',
+        content: 'Yes! We wrote a small LangChain script to pipe the SEO output from @AutoWriter Pro directly into the prompt generator for @MidCanvas. It works like a charm. Let me know if you want the snippet!',
+        timestamp: '5 minutes ago',
+        likes: 12
+      }
+    ]
+  },
   // --- TOP POST ---
   {
     id: 'p5',
@@ -146,8 +173,8 @@ export const mockPosts: Post[] = [
     timestamp: '2 days ago',
     likes: 512,
     comments: 89,
-    isLiked: true, // Showcasing liked state
-    isBookmarked: true, // Showcasing bookmarked state
+    isLiked: true,
+    isBookmarked: true,
     tags: ['Developer Tools', 'Updates', 'Showcase'],
     replies: []
   },
@@ -156,7 +183,7 @@ export const mockPosts: Post[] = [
     id: 'p3',
     authorName: 'Alice Chen',
     authorRole: 'Developer',
-    authorAvatar: '[https://ui-avatars.com/api/?name=Alice+Chen&background=random](https://ui-avatars.com/api/?name=Alice+Chen&background=random)',
+    authorAvatar: 'https://ui-avatars.com/api/?name=Alice+Chen&background=random',
     content: 'I see a lot of requests for data extraction agents. \n\n**Pro-tip:** when requesting a custom agent, please provide sample data structures (like a target `JSON` schema)! It cuts development time in half. \n\nWhat to include:\n- The source URL or Document type\n- The specific fields you need extracted\n- The final output format you want (`CSV`, `JSON`, `Postgres`)\n\n🚀',
     timestamp: '5 hours ago',
     likes: 342,
@@ -170,7 +197,7 @@ export const mockPosts: Post[] = [
     id: 'p1',
     authorName: 'Sarah Lee',
     authorRole: 'Developer',
-    authorAvatar: '[https://ui-avatars.com/api/?name=Sarah+Lee&background=random](https://ui-avatars.com/api/?name=Sarah+Lee&background=random)',
+    authorAvatar: 'https://ui-avatars.com/api/?name=Sarah+Lee&background=random',
     content: 'Just updated DevOpsBot to handle Kubernetes cluster autoscaling! Anyone want to beta test the new feature? Looking for feedback from teams managing `>50 nodes`.',
     timestamp: '2 hours ago',
     likes: 24,
@@ -182,7 +209,7 @@ export const mockPosts: Post[] = [
         id: 'r1',
         authorName: 'Alex Johnson',
         authorRole: 'Consumer',
-        authorAvatar: '[https://ui-avatars.com/api/?name=Alex+Johnson&background=random](https://ui-avatars.com/api/?name=Alex+Johnson&background=random)',
+        authorAvatar: 'https://ui-avatars.com/api/?name=Alex+Johnson&background=random',
         content: '@ai Can you explain what Kubernetes cluster autoscaling means in simple terms?',
         timestamp: '1 hour ago',
         likes: 3
@@ -191,7 +218,7 @@ export const mockPosts: Post[] = [
         id: 'r2',
         authorName: 'AI Assistant',
         authorRole: 'AI',
-        authorAvatar: '[https://ui-avatars.com/api/?name=AI&background=6366f1&color=fff](https://ui-avatars.com/api/?name=AI&background=6366f1&color=fff)',
+        authorAvatar: 'https://ui-avatars.com/api/?name=AI&background=6366f1&color=fff',
         content: 'Sure! **Kubernetes cluster autoscaling** automatically adjusts the number of servers (nodes) in your cluster based on the demands of your applications.\n\nIt\'s like automatically adding or removing cashiers at a grocery store based on how long the checkout line is.',
         timestamp: '1 hour ago',
         likes: 15,

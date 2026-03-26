@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Navbar, { ViewType } from './components/Navbar';
 import AgentCard from './components/AgentCard';
 import Sidebar from './components/Sidebar';
@@ -30,10 +30,53 @@ export default function App() {
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'trending' | 'newest' | 'recommended'>('trending');
   
-  // DEFAULT VIEW IS NOW CATEGORIES
-  const [mainView, setMainView] = useState<ViewType>('categories');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [recommendedAgentIds, setRecommendedAgentIds] = useState<string[] | null>(null);
+  // DEFAULT VIEW IS NOW CATEGORIES
+  // const [mainView, setMainView] = useState<ViewType>('categories');
+  // 1. Initialize state by reading the URL hash on the first load (Keep your existing one)
+  const [mainView, setMainView] = useState<ViewType>(() => {
+    const hash = window.location.hash.replace('#', '');
+    const validViews = [
+      'categories', 'agents', 'community', 'profile', 'settings', 
+      'network', 'leaderboard', 'launch', 'notifications', 
+      'developerProfile', 'userRequests', 'agentTester'
+    ];
+    return validViews.includes(hash) ? (hash as ViewType) : 'categories';
+  });
+
+  // 2. LISTEN for the Back/Forward buttons
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      const validViews = [
+        'categories', 'agents', 'community', 'profile', 'settings', 
+        'network', 'leaderboard', 'launch', 'notifications', 
+        'developerProfile', 'userRequests', 'agentTester'
+      ];
+      
+      // If the hash is valid, update React's state to match the URL
+      if (validViews.includes(hash)) {
+        setMainView(hash as ViewType);
+      } else if (!hash) {
+        // If they go all the way back to just "localhost:5173/"
+        setMainView('categories'); 
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    
+    // Cleanup the listener when component unmounts
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []); // Empty array means this listener only gets attached once
+
+  // 3. UPDATE the URL when the user clicks a button in the app
+  useEffect(() => {
+    // Only update if it's actually different, to prevent infinite loops
+    if (window.location.hash.replace('#', '') !== mainView) {
+      window.location.hash = mainView;
+    }
+  }, [mainView]);
 
   // Helper to get icons for categories dynamically
   const getCategoryIcon = (cat: string) => {
@@ -211,7 +254,10 @@ export default function App() {
       case 'community': return (
           <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-12 max-w-full">
             <div className="lg:col-span-8 xl:col-span-9 min-w-0">
-              <CommunityFeed initialPosts={mockPosts} />
+              <CommunityFeed 
+                initialPosts={mockPosts} 
+                onAgentClick={setSelectedAgent} // <-- ADD THIS PROP
+              />
             </div>
             <div className="lg:col-span-4 xl:col-span-3 min-w-0">
               <Sidebar leaderboard={leaderboardData.slice(0, 3)} onUserClick={handleUserClick} onViewLeaderboard={() => setMainView('leaderboard')} showLeaderboard={false} />
